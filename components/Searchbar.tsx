@@ -1,12 +1,32 @@
 "use client"
 
-import React from 'react'
+import React, { FormEvent, isValidElement, useState } from 'react'
+
+const isValidAmazonProductLink = (url: string) => {
+  try{
+    const parsedURL = new URL(url);
+    const hostname = parsedURL.hostname;
+
+    if(hostname.includes('amazon.com') || 
+       hostname.includes('amazon.') ||
+       hostname.includes('amazon') ){
+        return true;
+      }
+    }
+    catch(error){
+      return false;
+    }
+    return false;
+  }
 
 const Searchbar = () => {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    // Add logic to handle the submitted URL here
-    console.log("Form submitted")
+  const [searchPrompt, setSearchPrompt] = useState('');
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const isValidLink = isValidAmazonProductLink(searchPrompt);
+
   }
 
   return (
@@ -16,6 +36,8 @@ const Searchbar = () => {
     >
       <input 
         type="text"
+        value={searchPrompt}
+        onChange={(e) => setSearchPrompt(e.target.value)}
         placeholder='Enter product link'
         className="w-3/4 sm:flex-1 flex-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400"
       />

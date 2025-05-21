@@ -20,9 +20,9 @@ const HeroCarousal = () => {
       <Carousel
         showThumbs={false}
         showStatus={false}
-        autoPlay
+        // autoPlay
         infiniteLoop={true} 
-        interval={2000}
+        // interval={2000}
         showArrows={false}
         swipeable
         emulateTouch
