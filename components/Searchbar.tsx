@@ -9,7 +9,7 @@ const isValidAmazonProductLink = (url: string) => {
 
     if(hostname.includes('amazon.com') || 
        hostname.includes('amazon.') ||
-       hostname.includes('amazon') ){
+       hostname.endsWith('amazon') ){
         return true;
       }
     }
@@ -21,12 +21,23 @@ const isValidAmazonProductLink = (url: string) => {
 
 const Searchbar = () => {
   const [searchPrompt, setSearchPrompt] = useState('');
+  const [isLoading, setisLoading] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const isValidLink = isValidAmazonProductLink(searchPrompt);
 
+    if(!isValidLink) return
+      alert('Please enter a valid Amazon product link');
+    
+    try{
+      setisLoading(true); 
+    }catch(error){
+        console.error(error);
+    } finally{
+      setisLoading(false);
+    }
   }
 
   return (
@@ -45,8 +56,9 @@ const Searchbar = () => {
       <button 
         type='submit' 
         className="px-6 py-2 bg-black text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300"
+        disabled={searchPrompt === ''}
       >
-        Search
+        {isLoading ? 'Searching...' : 'Search'}
       </button>
     </form>
   )

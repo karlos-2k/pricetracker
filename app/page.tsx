@@ -50,8 +50,6 @@ const Home = () => {
           </div>
 
         </div>
-      </section>
-
       {/* Trending Section */}
       <section className="Trending-section">
         <h2 className="section-text">Trending</h2>
@@ -61,6 +59,8 @@ const Home = () => {
           ))}
         </div>
       </section>
+    </section>
+
     </>
   )
 }
