@@ -4,12 +4,17 @@ import { scrapeAmazonProduct } from "../scraper";
 
 // all code written will run here 
 
-export async function scrapeAndStoreProduct(productUrl: string){
-    if(!productUrl) return;
+export async function scrapeAndStoreProduct(productUrl: string) {
+    if(!productUrl) {
+        throw new Error("Product URL is required");
+    }
 
-    try{
+    try {
         const scrapedProduct = await scrapeAmazonProduct(productUrl);
-    } catch(error: any){
+        if(!scrapedProduct) throw new Error("Failed to scrape product");
+        
+        return scrapedProduct;
+    } catch(error: any) {
         throw new Error(`Error scraping product: ${error.message}`);
     }
 }
