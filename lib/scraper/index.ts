@@ -44,12 +44,17 @@ export async function scrapeAmazonProduct(url: string) {
         // Load the response data into cheerio
         const $ = cheerio.load(response.data);
         
+
         // Validate we got some content
         if (!$('body').length) {
             throw new Error('Failed to parse page content');
         }
 
-        return response.data;
+        // extract the porduct title
+        const title = $('#productTitle').text().trim();
+        console.log({title});
+        
+
     } catch(error: any) {
         console.error('Scraping error details:', {
             message: error.message,
