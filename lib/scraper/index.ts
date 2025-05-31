@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { BRIGHTDATA_USERNAME, BRIGHTDATA_PASSWORD } from "../config";
+import { extractPrice } from "../utils";
 
 export async function scrapeAmazonProduct(url: string) {
     if(!url) return;
@@ -44,16 +45,57 @@ export async function scrapeAmazonProduct(url: string) {
         // Load the response data into cheerio
         const $ = cheerio.load(response.data);
         
-
         // Validate we got some content
         if (!$('body').length) {
             throw new Error('Failed to parse page content');
         }
 
-        // extract the porduct title
+        // Extract the product title
         const title = $('#productTitle').text().trim();
-        console.log({title});
+
+        // Extract current price - trying multiple selectors
+        const priceElements = [
+            $('.priceToPay span.a-price-whole'),
+            $('.a.size.base.a-color-price'),
+            $('.a-button-selected .a-color-base'),
+            $('.a-price.a-text-price span.a-offscreen'),
+            $('#priceblock_ourprice'),
+            $('#priceblock_dealprice'),
+            $('.a-price .a-offscreen')
+        ];
+
+        const currentPrice = extractPrice(...priceElements);
+
+        const originalPrice = extractPrice(
+            $('#priceblock_ourprice'),
+            $('.a-price.a-text-price span.a-offscreen'),
+            $('#listPrice'),
+            $('#priceblock_dealprice'),
+            $('.a-size-base.a-color-price'),
+            $('.aok-relative span.a-offscreen'),
+            $('.aok-relative .a-price.a-text-price span.a-offscreen')
+        );
+
+        const outOfStock = $('#availability span').text().trim().toLowerCase() === 'currently unavailable';
         
+        const image = $('#landingImage').attr('data-a-dynamic-image') || 
+        $('#imgBlkFront').attr('data-a-dynamic-image');
+        
+        const imageUrls = Object.keys(JSON.parse(image || '{}'));
+
+        // Create the product data object
+        const productData = {
+            title,
+            currentPrice: Number(currentPrice) || 0,
+            originalPrice: Number(originalPrice) || 0,
+            url,
+            priceHistory: [],   
+            outOfStock,
+            image: imageUrls
+        };
+
+        console.log('Scraped Product Data:', productData);
+        return productData;
 
     } catch(error: any) {
         console.error('Scraping error details:', {
