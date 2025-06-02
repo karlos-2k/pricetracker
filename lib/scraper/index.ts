@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { BRIGHTDATA_USERNAME, BRIGHTDATA_PASSWORD } from "../config";
-import { extractPrice } from "../utils";
+import { extractCurrency, extractDescription, extractPrice } from "../utils";
 
 export async function scrapeAmazonProduct(url: string) {
     if(!url) return;
@@ -72,8 +72,8 @@ export async function scrapeAmazonProduct(url: string) {
             $('#listPrice'),
             $('#priceblock_dealprice'),
             $('.a-size-base.a-color-price'),
-            $('.aok-relative span.a-offscreen'),
-            $('.aok-relative .a-price.a-text-price span.a-offscreen')
+            // $('.aok-relative span.a-offscreen'),
+            // $('.aok-relative .a-price.a-text-price span.a-offscreen')
         );
 
         const outOfStock = $('#availability span').text().trim().toLowerCase() === 'currently unavailable';
@@ -83,6 +83,13 @@ export async function scrapeAmazonProduct(url: string) {
         
         const imageUrls = Object.keys(JSON.parse(image || '{}'));
 
+        const currency = extractCurrency($('.a-price-symbol'));
+
+        // extract discount rate and removing % sign
+        const discountRate = $('.savingsPercentage').text().replace(/[-%]/g, '');
+
+        const description = extractDescription($);
+
         // Create the product data object
         const productData = {
             title,
@@ -91,7 +98,14 @@ export async function scrapeAmazonProduct(url: string) {
             url,
             priceHistory: [],   
             outOfStock,
-            image: imageUrls
+            image: imageUrls,
+            currency,
+            discountRate,
+            stars: 4.5,
+            description,
+            lowestPrice: Number(currentPrice) || Number(originalPrice) || 0,
+            highestPrice: Number(originalPrice) || 0,
+            averagePrice: Number(currentPrice) || Number(originalPrice) || 0,
         };
 
         console.log('Scraped Product Data:', productData);
