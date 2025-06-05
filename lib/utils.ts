@@ -15,15 +15,18 @@ export function extractPrice(...elements: any) {
     const priceText = element.text().trim();
 
     if(priceText) {
-      const cleanPrice = priceText.replace(/[^\d.]/g, '');
-
-      let firstPrice; 
-
-      if (cleanPrice) {
-        firstPrice = cleanPrice.match(/\d+\.\d{2}/)?.[0];
-      } 
-
-      return firstPrice || cleanPrice;
+      // Remove any non-digit, non-decimal, non-comma characters
+      const cleanPrice = priceText.replace(/[^\d.,]/g, '');
+      
+      // Handle prices with commas (e.g. 1,234.56)
+      const withoutCommas = cleanPrice.replace(/,/g, '');
+      
+      // Try to match a valid price format (e.g. 123.45)
+      const match = withoutCommas.match(/^\d+\.?\d{0,2}$/);
+      
+      if (match) {
+        return match[0];
+      }
     }
   }
 

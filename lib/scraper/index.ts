@@ -94,17 +94,17 @@ export async function scrapeAmazonProduct(url: string) {
         const productData = {
             title,
             currentPrice: Number(currentPrice) || 0,
-            originalPrice: Number(originalPrice) || 0,
+            originalPrice: Number(originalPrice) || Number(currentPrice) || 0,  // fallback to current price if no original price
             url,
             priceHistory: [],   
             outOfStock,
-            image: imageUrls,
+            image: imageUrls[0],
             currency,
             discountRate,
             stars: 4.5,
             description,
             lowestPrice: Number(currentPrice) || Number(originalPrice) || 0,
-            highestPrice: Number(originalPrice) || 0,
+            highestPrice: Number(originalPrice) || Number(currentPrice) || 0,  // use current price as fallback
             averagePrice: Number(currentPrice) || Number(originalPrice) || 0,
         };
 
