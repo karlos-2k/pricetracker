@@ -1,8 +1,11 @@
 import Image from "next/image"
 import Searchbar from "@/components/Searchbar"
 import HeroCarousal from "@/components/HeroCarousal"
+import { getAllProducts } from "@/lib/actions"
+import ProductCard from "@/components/ProductCard"
 
-const Home = () => {
+const Home = async () => {
+  const allProducts = await getAllProducts(); // Fetching all products from the API
   return (
     <>
       {/* Hero Section */}
@@ -63,8 +66,8 @@ const Home = () => {
           {/* Grid layout for trending products */}
           <div className="flex flex-wrap gap-x-8 gap-y-16">
             {/* Temporary product list - to be replaced with dynamic data */}
-            {['Apple Iphone 15', 'Book', 'Sneakers'].map((product) => (
-              <div key={product}>{product}</div>
+            {allProducts?.map((product) => (   // Mapping through all products 
+              <ProductCard key={product._id} product={product}/>  // Displaying product titles 
             ))}
           </div>
         </section>

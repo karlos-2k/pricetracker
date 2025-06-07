@@ -7,7 +7,6 @@ import { scrapeAmazonProduct } from "../scraper";
 import { getLowestPrice, getHighestPrice, getAveragePrice } from "../utils";
 
 // all code written will run here 
-
 export async function scrapeAndStoreProduct(productUrl: string) {
     if(!productUrl) {
         throw new Error("Product URL is required");
@@ -56,6 +55,7 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     }
 }
 
+// fetch all products from database
 export async function getProductById(productId: string) {
     try{
         connectToDB();  
@@ -64,6 +64,17 @@ export async function getProductById(productId: string) {
 
         if(!product) return null;
         return product;
+    }catch(error: any) {
+        console.log(error);
+    }
+}
+
+export async function getAllProducts() {
+    try{
+        connectToDB();
+        const products = await Product.find();
+        
+        return products;
     }catch(error: any) {
         console.log(error);
     }
