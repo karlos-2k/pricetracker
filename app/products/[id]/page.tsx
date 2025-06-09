@@ -1,9 +1,13 @@
+type Props = {
+  params: {id: string}
+}
+
 import React from 'react'
 
-const page = () => {
+const ProductDetails = ({ params: {id}} : Props) => {
   return (
     <div>page</div>
   )
 }
 
-export default page
+export default ProductDetails

@@ -55,7 +55,7 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     }
 }
 
-// fetch all products from database
+//this allows us to get all products from database and get back to our details page
 export async function getProductById(productId: string) {
     try{
         connectToDB();  

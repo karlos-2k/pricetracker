@@ -9,14 +9,28 @@ interface Props {
 const productCard = ({product}: Props) => {  // Destructuring the product prop
   return (
     <Link href={`/product/${product._id}`} className='product-card' >
-        <div className='product-card-img-container'>
+        <div className='flex-1 relative flex flex-col gap-5 p-4 rounded-md'>
             <Image
                 src={product.image}
                 alt={product.title}
                 width={200}
                 height={200}
-                className="product-card_img"
+                className="max-h-[250px] object-contain w-full h-full bg-transparent"
             />
+        </div>
+
+        <div>
+          <h3 className='text-secondary text-xl leading-6 font-semibold truncate'>{product.title}</h3>
+
+          <div className='flex-justify-between'>
+            <p className='text-black opacity-50 text-lg capitalize'>
+              {product.category}
+            </p>
+            <p className='text-black text-lg font-semibold'>
+              <span>{product?.currency}</span>
+              <span>{product?.currentPrice}</span>
+            </p>
+          </div>
         </div>
     </Link>
 
