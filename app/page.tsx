@@ -61,8 +61,8 @@ const Home = async () => {
         </div>
 
         {/* Trending Products Section */}
-        <section className="Trending-section">
-          <h2 className="section-text">Trending</h2>
+        <section className="flex flex-col gap-10 px-6 md:px-20 py-24">
+          <h2 className="text-secondary text-[32px] font-semibold">Trending</h2>
           {/* Grid layout for trending products */}
           <div className="flex flex-wrap gap-x-8 gap-y-16">
             {/* Temporary product list - to be replaced with dynamic data */}

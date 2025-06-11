@@ -90,6 +90,8 @@ export async function scrapeAmazonProduct(url: string) {
 
         const description = extractDescription($);
 
+        const reviewsCount = $('#acrCustomerReviewText').text().trim();
+
         // Create the product data object
         const productData = {
             title,
@@ -106,6 +108,7 @@ export async function scrapeAmazonProduct(url: string) {
             lowestPrice: Number(currentPrice) || Number(originalPrice) || 0,
             highestPrice: Number(originalPrice) || Number(currentPrice) || 0,  // use current price as fallback
             averagePrice: Number(currentPrice) || Number(originalPrice) || 0,
+            reviewsCount,
         };
 
         console.log('Scraped Product Data:', productData);

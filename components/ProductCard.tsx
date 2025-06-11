@@ -8,7 +8,7 @@ interface Props {
 }
 const productCard = ({product}: Props) => {  // Destructuring the product prop
   return (
-    <Link href={`/product/${product._id}`} className='product-card' >
+    <Link href={`/products/${product._id}`} className='sm:w-[292px] sm:max-w-[292px] w-full flex-1 flex flex-col gap-4 rounded-md' >
         <div className='flex-1 relative flex flex-col gap-5 p-4 rounded-md'>
             <Image
                 src={product.image}
