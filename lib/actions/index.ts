@@ -5,6 +5,7 @@ import Product from "../models/product.model";
 import { connectToDB } from "../mongoose";
 import { scrapeAmazonProduct } from "../scraper";
 import { getLowestPrice, getHighestPrice, getAveragePrice } from "../utils";
+import mongoose from "mongoose";
 
 // all code written will run here 
 export async function scrapeAndStoreProduct(productUrl: string) {
@@ -13,28 +14,72 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     }
 
     try {
-        await connectToDB();  // ensure we await the connection
-        
-        const scrapedProduct = await scrapeAmazonProduct(productUrl);
-        if(!scrapedProduct) throw new Error("Failed to scrape product");
-        
-        let product = scrapedProduct;  // create a product object
+        // Validate URL format
+        const parsedURL = new URL(productUrl);
+        if (!parsedURL.hostname.includes('amazon')) {
+            throw new Error('Please provide a valid Amazon product URL');
+        }
 
-        const existingProduct = await Product.findOne({url: scrapedProduct.url});  // check if the product already exists
+        // Connect to database
+        try {
+            await connectToDB();
+        } catch (error) {
+            console.error('Database connection failed:', error);
+            throw new Error('Failed to connect to database. Please try again.');
+        }
+        
+        // Scrape product
+        const scrapedProduct = await scrapeAmazonProduct(productUrl);
+        if (!scrapedProduct) {
+            throw new Error('Failed to scrape product data');
+        }
+
+        // Validate scraped data
+        if (!scrapedProduct.title || !scrapedProduct.currentPrice || !scrapedProduct.image) {
+            console.error('Invalid product data:', scrapedProduct);
+            throw new Error('Failed to extract product information. Please try a different product.');
+        }
+        
+        let product = scrapedProduct;
+
+        const existingProduct = await Product.findOne({url: scrapedProduct.url});
 
         if(existingProduct) {
-            const updatedPriceHistory: any = [
-                ...existingProduct.priceHistory,   // spread the existing price history
-                { price: scrapedProduct.currentPrice},  // add the new price
-            ]
+            // Update price history
+            const updatedPriceHistory = [
+                ...existingProduct.priceHistory,
+                { price: scrapedProduct.currentPrice, date: new Date() }
+            ];
+
+            // Calculate new price metrics
+            const lowestPrice = getLowestPrice(updatedPriceHistory);
+            const highestPrice = getHighestPrice(updatedPriceHistory);
+            const averagePrice = getAveragePrice(updatedPriceHistory);
 
             product = {
                 ...scrapedProduct,
                 priceHistory: updatedPriceHistory,
-                lowestPrice: getLowestPrice(updatedPriceHistory),
-                highestPrice: getHighestPrice(updatedPriceHistory),
-                averagePrice: getAveragePrice(updatedPriceHistory),
-            }
+                lowestPrice,
+                highestPrice,
+                averagePrice,
+                reviewsCount: scrapedProduct.reviewsCount || existingProduct.reviewsCount,
+                image: scrapedProduct.image || existingProduct.image,
+                discountRate: scrapedProduct.discountRate || existingProduct.discountRate,
+                isOutOfStock: scrapedProduct.isOutOfStock
+            };
+        } else {
+            // For new products, set initial price metrics
+            product = {
+                ...scrapedProduct,
+                lowestPrice: scrapedProduct.currentPrice,
+                highestPrice: scrapedProduct.currentPrice,
+                averagePrice: scrapedProduct.currentPrice,
+                priceHistory: [
+                    {
+                        price: scrapedProduct.currentPrice,
+                    }
+                ]
+            };
         }
 
         const newProduct = await Product.findOneAndUpdate(
@@ -48,7 +93,11 @@ export async function scrapeAndStoreProduct(productUrl: string) {
         }
 
         // Convert Mongoose document to plain JavaScript object
-        return JSON.parse(JSON.stringify(newProduct));
+        return {
+            ...JSON.parse(JSON.stringify(newProduct)),
+            reviewsCount: newProduct.reviewsCount,
+            currentPrice: newProduct.currentPrice
+        };
 
     } catch(error: any) {
         throw new Error(`Error scraping product: ${error.message}`)
@@ -57,15 +106,45 @@ export async function scrapeAndStoreProduct(productUrl: string) {
 
 //this allows us to get all products from database and get back to our details page
 export async function getProductById(productId: string) {
-    try{
-        connectToDB();  
+    try {
+        await connectToDB();
+        
+        const product = await Product.findOne({ _id: productId });
+        
+        if (!product) {
+            console.log(`No product found with ID: ${productId}`);
+            return null;
+        }
+        
+        return JSON.parse(JSON.stringify(product));
+    } catch (error: any) {
+        console.error('Error in getProductById:', error);
+        throw new Error(`Failed to get product: ${error.message}`);
+    }
+}
 
-        const product = await Product.findOne({_id: productId});
+export async function getSimilarProducts(productId: string) {
+    try {
+        await connectToDB();
 
-        if(!product) return null;
-        return product;
-    }catch(error: any) {
-        console.log(error);
+        const currentProduct = await Product.findById(productId);
+        
+        if (!currentProduct) {
+            console.log(`No product found with ID: ${productId}`);
+            return null;
+        }
+
+        const similarProducts = await Product.find({
+            _id: { $ne: productId },
+            category: currentProduct.category // Match products in the same category
+        })
+        .limit(3)
+        .lean(); // Use lean() for better performance
+
+        return JSON.parse(JSON.stringify(similarProducts));
+    } catch (error: any) {
+        console.error('Error in getSimilarProducts:', error);
+        throw new Error(`Failed to get similar products: ${error.message}`);
     }
 }
 

@@ -4,13 +4,18 @@ import { BRIGHTDATA_USERNAME, BRIGHTDATA_PASSWORD } from "../config";
 import { extractCurrency, extractDescription, extractPrice } from "../utils";
 
 export async function scrapeAmazonProduct(url: string) {
-    if(!url) return;
+    if(!url) {
+        throw new Error('URL is required');
+    }
 
-    // BrightData proxy configuration
+    // Validate BrightData credentials
+    if(!BRIGHTDATA_USERNAME || !BRIGHTDATA_PASSWORD) {
+        throw new Error('BrightData credentials are not configured');
+    }
+
     const username = BRIGHTDATA_USERNAME;
     const password = BRIGHTDATA_PASSWORD;
-
-    const port = 22225; // Updated to correct Brightdata port
+    const port = 22225;
     const session_id = (1000000 * Math.random()) | 0;
 
     const options = {
@@ -90,25 +95,30 @@ export async function scrapeAmazonProduct(url: string) {
 
         const description = extractDescription($);
 
-        const reviewsCount = $('#acrCustomerReviewText').text().trim();
+        const reviewsCount = $('#acrCustomerReviewText').text().trim();        // Ensure we have valid data before creating the product
+        if (!title || !currentPrice || !imageUrls.length) {
+            throw new Error('Failed to extract essential product data');
+        }
 
-        // Create the product data object
+        // Create the product data object with proper defaults
         const productData = {
-            title,
-            currentPrice: Number(currentPrice) || 0,
-            originalPrice: Number(originalPrice) || Number(currentPrice) || 0,  // fallback to current price if no original price
             url,
-            priceHistory: [],   
-            outOfStock,
-            image: imageUrls[0],
-            currency,
-            discountRate,
-            stars: 4.5,
-            description,
-            lowestPrice: Number(currentPrice) || Number(originalPrice) || 0,
-            highestPrice: Number(originalPrice) || Number(currentPrice) || 0,  // use current price as fallback
-            averagePrice: Number(currentPrice) || Number(originalPrice) || 0,
-            reviewsCount,
+            title,
+            currentPrice: Number(currentPrice),
+            originalPrice: Number(originalPrice) || Number(currentPrice),
+            priceHistory: [{ price: Number(currentPrice) }],
+            image: imageUrls[0],  // Use the first image URL
+            currency: currency || '$',
+            discountRate: Number(discountRate) || 0,
+            category: 'General',  // Default category
+            reviewsCount: parseInt(reviewsCount) || 0,
+            stars: 0,  // Default value
+            isOutOfStock: outOfStock,
+            description: description || '',
+            lowestPrice: Number(currentPrice),
+            highestPrice: Number(originalPrice) || Number(currentPrice),
+            averagePrice: Number(currentPrice),
+
         };
 
         console.log('Scraped Product Data:', productData);

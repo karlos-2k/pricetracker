@@ -12,6 +12,8 @@ const THRESHOLD_PERCENTAGE = 40;
 // Extracts and returns the price from a list of possible elements.
 export function extractPrice(...elements: any) {
   for (const element of elements) {
+    if (!element) continue;
+
     const priceText = element.text().trim();
 
     if(priceText) {
@@ -25,12 +27,15 @@ export function extractPrice(...elements: any) {
       const match = withoutCommas.match(/^\d+\.?\d{0,2}$/);
       
       if (match) {
-        return match[0];
+        const price = parseFloat(match[0]);
+        if (!isNaN(price) && price > 0) {
+          return price.toFixed(2);
+        }
       }
     }
   }
 
-  return '';
+  return '0.00';
 }
 
 // Extracts and returns the currency symbol from an element.
@@ -64,34 +69,32 @@ export function extractDescription($: any) {
 }
 
 export function getHighestPrice(priceList: PriceHistoryItem[]) {
-  let highestPrice = priceList[0];
+  if (!priceList || priceList.length === 0) return 0;
 
-  for (let i = 0; i < priceList.length; i++) {
-    if (priceList[i].price > highestPrice.price) {
-      highestPrice = priceList[i];
-    }
-  }
-
-  return highestPrice.price;
+  return Math.max(...priceList.map(item => Number(item.price) || 0));
 }
 
 export function getLowestPrice(priceList: PriceHistoryItem[]) {
-  let lowestPrice = priceList[0];
+  if (!priceList || priceList.length === 0) return 0;
 
-  for (let i = 0; i < priceList.length; i++) {
-    if (priceList[i].price < lowestPrice.price) {
-      lowestPrice = priceList[i];
-    }
-  }
+  const validPrices = priceList
+    .map(item => Number(item.price))
+    .filter(price => !isNaN(price) && price > 0);
 
-  return lowestPrice.price;
+  return validPrices.length > 0 ? Math.min(...validPrices) : 0;
 }
 
 export function getAveragePrice(priceList: PriceHistoryItem[]) {
-  const sumOfPrices = priceList.reduce((acc, curr) => acc + curr.price, 0);
-  const averagePrice = sumOfPrices / priceList.length || 0;
+  if (!priceList || priceList.length === 0) return 0;
 
-  return averagePrice;
+  const validPrices = priceList
+    .map(item => Number(item.price))
+    .filter(price => !isNaN(price) && price > 0);
+
+  if (validPrices.length === 0) return 0;
+
+  const sum = validPrices.reduce((acc, curr) => acc + curr, 0);
+  return Number((sum / validPrices.length).toFixed(2));
 }
 
 export const getEmailNotifType = (

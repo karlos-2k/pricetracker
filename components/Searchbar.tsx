@@ -33,20 +33,31 @@ const Searchbar = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Validate the entered Amazon product link
-    const isValidLink = isValidAmazonProductLink(searchPrompt);
+    // Trim the search input
+    const trimmedSearchPrompt = searchPrompt.trim();
 
-    if(!isValidLink) return
+    // Validate the entered Amazon product link
+    const isValidLink = isValidAmazonProductLink(trimmedSearchPrompt);
+
+    if(!isValidLink) {
       alert('Please enter a valid Amazon product link');
+      return;
+    }
     
-    try{
-      setisLoading(true); 
+    try {
+      setisLoading(true);
 
       // Initiate web scraping for the product details
-      const product = await scrapeAndStoreProduct(searchPrompt);
-    }catch(error){
-        console.error(error);
-    } finally{
+      const product = await scrapeAndStoreProduct(trimmedSearchPrompt);
+
+      if (product) {
+        setSearchPrompt('');
+        alert('Product has been scraped successfully!');
+      }
+    } catch(error: any) {
+      console.error('Error in handleSubmit:', error);
+      alert(error.message || 'Failed to scrape product. Please try again.');
+    } finally {
       setisLoading(false);
     }
   }

@@ -52,7 +52,6 @@ const Home = async () => {
             <Image
               src="/assets/icons/hand-drawn-arrow.svg"
               alt="arrow"
-              style={{height: "auto" }}
               width={130}
               height={175}
               className="max-xl:hidden absolute -left-[20%] -bottom-[-2%] z-0"

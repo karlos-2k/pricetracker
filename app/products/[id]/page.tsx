@@ -1,5 +1,7 @@
+import Modal from "@/components/Modal";
 import PriceInfoCard from "@/components/PriceInfoCard";
-import { getProductById } from "@/lib/actions";
+import ProductCard from "@/components/ProductCard";
+import { getProductById, getSimilarProducts } from "@/lib/actions";
 import { formatNumber } from "@/lib/utils";
 import { Product } from "@/types";
 import Image from "next/image";
@@ -10,10 +12,28 @@ interface Props {
   params: { id: string }
 }
 
-const ProductDetails = async ({ params: {id}}: Props) => {  // get product by id
-  const product: Product = await getProductById(id);
-  
-  if (!product) redirect('/');    // if product is not found, redirect to home page
+const ProductDetails = async ({ params: {id}}: Props) => {
+  let product: Product | null = null;
+  let similarProducts: any[] = [];
+
+  try {
+    product = await getProductById(id);
+    
+    if (!product) {
+      console.log('Product not found, redirecting to home');
+      redirect('/');
+    }
+
+    if (!product.image || !product.title) {
+      console.error('Product is missing required fields:', product);
+      redirect('/');
+    }
+
+    similarProducts = await getSimilarProducts(id) || [];
+  } catch (error) {
+    console.error('Error in ProductDetails:', error);
+    redirect('/');
+  }
 
   return (
     <div className="flex flex-col gap-16 flex-wrap px-6 md:px-20 py-24">
@@ -113,7 +133,7 @@ const ProductDetails = async ({ params: {id}}: Props) => {  // get product by id
                   height={16}
                   className="cursor-pointer"
                 />
-                <p text-sm text-secondary font-semibold>
+                <p className="text-sm text-secondary font-semibold">
                   {product.reviewsCount } Reviews
                 </p>
               </div>
@@ -152,11 +172,53 @@ const ProductDetails = async ({ params: {id}}: Props) => {  // get product by id
                 value={`${product.currency} ${formatNumber(product.currentPrice)}`}
                 borderColor="#b6dbff"
               />
-            </div>
+            </div>          
           </div>
 
+          <Modal />
         </div>
       </div>
+
+      <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-5">
+          <h3 className="text-2xl text-secondary font-semibold">
+            Product Description
+          </h3>
+
+          <div className="flex flex-col gap-4">
+            {product?.description?.split('\n')}
+          </div>
+        </div>
+
+        <button className="btn bg-black w-fit mx-auto flex items-center justify-center gap-3 min-w-[260px] py-2 rounded-2xl">
+          <Image 
+            src="/assets/icons/bag.svg"
+            alt="check"
+            width={22}
+            height={22}
+          />
+
+          <Link href='/' className="text-base text-white">
+            Buy Now
+          </Link>
+        </button>
+      </div>
+
+      {similarProducts && similarProducts?.length > 0 && (
+        <div className="py-14 flex flex-col gap-2 w-full">
+          <p className="text-secondary text-[32px] font-semibold">
+            Similar Products
+          </p>
+
+          <div className="flex flex-wrap gap-10 w-full">
+            {similarProducts.map((product) => (
+              <ProductCard key={product._id} product={product}/>   
+            )
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   )
 }
