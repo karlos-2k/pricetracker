@@ -6,6 +6,7 @@ import { connectToDB } from "../mongoose";
 import { scrapeAmazonProduct } from "../scraper";
 import { getLowestPrice, getHighestPrice, getAveragePrice } from "../utils";
 import mongoose from "mongoose";
+import { generateEmailBody, sendEmail } from "../nodemailer";
 
 // all code written will run here 
 export async function scrapeAndStoreProduct(productUrl: string) {
@@ -147,9 +148,35 @@ export async function getSimilarProducts(productId: string) {
         throw new Error(`Failed to get similar products: ${error.message}`);
     }
 }
+export async function addUserEmailToProduct(
+    productId: string,
+    userEmail: string
+) {
+    try {
+        const product = await Product.findById(productId);
+
+        if (!product) return;
+
+        const userExists = product.users.some((user: any) => user.email === userEmail);  // Check if user already exists
+
+        if(!userExists){
+            product.users.push({
+                email: userEmail,
+            });
+
+            await product.save();  // Save the updated product
+
+            const emailContent = await generateEmailBody(product, "WELCOME");
+
+            await sendEmail(await emailContent, [userEmail]);  // Send welcome email
+        }
+    }catch(error: any) {
+        console.log(error);
+    }
+}
 
 export async function getAllProducts() {
-    try{
+    try {
         connectToDB();
         const products = await Product.find();
         
