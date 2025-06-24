@@ -31,12 +31,12 @@ const Modal = ({ productId }: Props) => {
 
   return (
     <>
-      <button type="button" className="py-4 px-4 bg-black hover:bg-opacity-70 rounded-[30px] text-white text-lg font-semibold" onClick={openModal}>
+      <button type="button" className="btn" onClick={openModal}>
         Track
       </button>
 
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" onClose={closeModal} className="fixed inset-0 z-10 overflow-y-auto">
+        <Dialog as="div" onClose={closeModal} className="dialog-container">
           <div className="min-h-screen px-4 text-center">
             <TransitionChild
               as={Fragment}
@@ -47,7 +47,7 @@ const Modal = ({ productId }: Props) => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div className="fixed inset-0 bg-opacity-25" aria-hidden="true" />
+              <div className="fixed inset-0 bg-black bg-opacity-25" aria-hidden="true" />
             </TransitionChild>
 
             <span
@@ -64,7 +64,7 @@ const Modal = ({ productId }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="p-6  bg-white inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform  shadow-xl rounded-2xl">
+              <div className="dialog-content">
                 <div className="flex flex-col">
                   <div className="flex justify-between">
                     <div className="p-3 border border-gray-200 rounded-10">
@@ -86,7 +86,7 @@ const Modal = ({ productId }: Props) => {
                     />
                   </div>
 
-                  <h4 className="text-black text-lg leading-[24px] font-semibold mt-4">
+                  <h4 className="dialog-head_text">
                     Stay updated with product pricing alerts right in your inbox!
                   </h4>
 
@@ -99,7 +99,7 @@ const Modal = ({ productId }: Props) => {
                   <label htmlFor="email" className="text-sm font-medium text-gray-700">
                     Email address
                   </label>
-                  <div className="px-5 py-3 mt-3 flex items-center gap-2 border border-gray-300 rounded-[27px]">
+                  <div className="dialog-input_container">
                     <Image 
                       src="/assets/icons/mail.svg"
                       alt='mail'
@@ -114,12 +114,12 @@ const Modal = ({ productId }: Props) => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email address"
-                      className='flex-1 pl-1 border-none text-gray-500 text-base focus:outline-none border border-gray-300 rounded-[27px] shadow-xs'
+                      className='dialog-input'
                     />
                   </div>
 
                   <button type="submit"
-                    className="px-5 py-3 text-white text-base font-semibold border border-black bg-black rounded-lg mt-8"
+                    className="dialog-btn"
                   >
                     {isSubmitting ? 'Submitting...' : 'Track'}
                   </button>

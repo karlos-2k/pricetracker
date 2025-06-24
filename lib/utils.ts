@@ -1,4 +1,4 @@
-import { PriceHistoryItem, Product } from "../types";
+import { PriceHistoryItem, Product } from "@/types";
 
 const Notification = {
   WELCOME: 'WELCOME',
@@ -12,30 +12,22 @@ const THRESHOLD_PERCENTAGE = 40;
 // Extracts and returns the price from a list of possible elements.
 export function extractPrice(...elements: any) {
   for (const element of elements) {
-    if (!element) continue;
-
     const priceText = element.text().trim();
 
     if(priceText) {
-      // Remove any non-digit, non-decimal, non-comma characters
-      const cleanPrice = priceText.replace(/[^\d.,]/g, '');
-      
-      // Handle prices with commas (e.g. 1,234.56)
-      const withoutCommas = cleanPrice.replace(/,/g, '');
-      
-      // Try to match a valid price format (e.g. 123.45)
-      const match = withoutCommas.match(/^\d+\.?\d{0,2}$/);
-      
-      if (match) {
-        const price = parseFloat(match[0]);
-        if (!isNaN(price) && price > 0) {
-          return price.toFixed(2);
-        }
-      }
+      const cleanPrice = priceText.replace(/[^\d.]/g, '');
+
+      let firstPrice; 
+
+      if (cleanPrice) {
+        firstPrice = cleanPrice.match(/\d+\.\d{2}/)?.[0];
+      } 
+
+      return firstPrice || cleanPrice;
     }
   }
 
-  return '0.00';
+  return '';
 }
 
 // Extracts and returns the currency symbol from an element.
@@ -69,32 +61,34 @@ export function extractDescription($: any) {
 }
 
 export function getHighestPrice(priceList: PriceHistoryItem[]) {
-  if (!priceList || priceList.length === 0) return 0;
+  let highestPrice = priceList[0];
 
-  return Math.max(...priceList.map(item => Number(item.price) || 0));
+  for (let i = 0; i < priceList.length; i++) {
+    if (priceList[i].price > highestPrice.price) {
+      highestPrice = priceList[i];
+    }
+  }
+
+  return highestPrice.price;
 }
 
 export function getLowestPrice(priceList: PriceHistoryItem[]) {
-  if (!priceList || priceList.length === 0) return 0;
+  let lowestPrice = priceList[0];
 
-  const validPrices = priceList
-    .map(item => Number(item.price))
-    .filter(price => !isNaN(price) && price > 0);
+  for (let i = 0; i < priceList.length; i++) {
+    if (priceList[i].price < lowestPrice.price) {
+      lowestPrice = priceList[i];
+    }
+  }
 
-  return validPrices.length > 0 ? Math.min(...validPrices) : 0;
+  return lowestPrice.price;
 }
 
 export function getAveragePrice(priceList: PriceHistoryItem[]) {
-  if (!priceList || priceList.length === 0) return 0;
+  const sumOfPrices = priceList.reduce((acc, curr) => acc + curr.price, 0);
+  const averagePrice = sumOfPrices / priceList.length || 0;
 
-  const validPrices = priceList
-    .map(item => Number(item.price))
-    .filter(price => !isNaN(price) && price > 0);
-
-  if (validPrices.length === 0) return 0;
-
-  const sum = validPrices.reduce((acc, curr) => acc + curr, 0);
-  return Number((sum / validPrices.length).toFixed(2));
+  return averagePrice;
 }
 
 export const getEmailNotifType = (

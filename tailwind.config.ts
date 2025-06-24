@@ -32,7 +32,7 @@ module.exports = {
           "10xl": '1440px'
         },
         fontFamily: {
-          inter: ['Inter', 'sans-serif'],
+          inter: ['var(--font-inter)'],
           spaceGrotesk: ['Space Grotesk', 'sans-serif'],
         },
         borderRadius: {

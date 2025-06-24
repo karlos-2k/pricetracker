@@ -20,9 +20,9 @@ const ProductDetails = async ({ params: { id } }: Props) => {
   const similarProducts = await getSimilarProducts(id);
 
   return (
-    <div className="flex flex-col gap-16 flex-wrap px-6 md:px-20 py-24">
+    <div className="product-container">
       <div className="flex gap-28 xl:flex-row flex-col">
-        <div className="flex-grow xl:max-w-[50%] max-w-full py-16 border border-[#CDDBFF] rounded-[17px]">
+        <div className="product-image">
           <Image 
             src={product.image}
             alt={product.title}
@@ -49,7 +49,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-2 bg-[#FFF0F0] rounded-10">
+              <div className="product-hearts">
                 <Image 
                   src="/assets/icons/red-heart.svg"
                   alt="heart"
@@ -82,7 +82,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
             </div>
           </div>
 
-          <div className="flex items-center flex-wrap gap-10 py-6 border-y border-y-[#E4E4E4]">
+          <div className="product-info">
             <div className="flex flex-col gap-2">
               <p className="text-[34px] text-secondary font-bold">
                 {product.currency} {formatNumber(product.currentPrice)}
@@ -94,7 +94,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
 
             <div className="flex flex-col gap-4">
               <div className="flex gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-[#FBF3EA] rounded-[27px]">
+                <div className="product-stars">
                   <Image 
                     src="/assets/icons/star.svg"
                     alt="star"
@@ -106,7 +106,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-2 bg-white-200 rounded-[27px]">
+                <div className="product-reviews">
                   <Image 
                     src="/assets/icons/comment.svg"
                     alt="comment"
@@ -178,10 +178,10 @@ const ProductDetails = async ({ params: { id } }: Props) => {
 
       {similarProducts && similarProducts?.length > 0 && (
         <div className="py-14 flex flex-col gap-2 w-full">
-          <p className="text-secondary text-[32px] font-semibold">Similar Products</p>
+          <p className="section-text">Similar Products</p>
 
           <div className="flex flex-wrap gap-10 mt-7 w-full">
-            {similarProducts.map((product: any) => (
+            {similarProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
           </div>

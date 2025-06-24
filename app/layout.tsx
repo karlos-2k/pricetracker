@@ -1,8 +1,11 @@
 // Import necessary dependencies
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import './globals.css'
+import { Inter } from 'next/font/google'
 import Navbar from "@/components/Navbar";
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 // Initialize Geist Sans font with Latin subset
 // This font will be used as the primary sans-serif font
